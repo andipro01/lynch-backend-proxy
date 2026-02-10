@@ -11,16 +11,19 @@ app.get('/api/screen', async (req, res) => {
   try {
     const { exchange } = req.query;
     
-    // Use stock list endpoint instead
     const url = `https://financialmodelingprep.com/api/v3/stock/list?apikey=${API_KEY}`;
-    
     const response = await fetch(url);
-    const allStocks = await response.json();
+    const data = await response.json();
+    
+    // Check if data is array, if not send error
+    if (!Array.isArray(data)) {
+      return res.json({ error: 'Unexpected API response', data: data });
+    }
     
     // Filter by exchange if provided
     const filtered = exchange 
-      ? allStocks.filter(s => s.exchangeShortName === exchange)
-      : allStocks;
+      ? data.filter(s => s.exchangeShortName === exchange)
+      : data;
     
     res.json(filtered);
   } catch (error) {
